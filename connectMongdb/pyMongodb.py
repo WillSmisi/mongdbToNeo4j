@@ -32,6 +32,10 @@ def InputCreateNode():
         except KeyError:
             pass
         try:
+            i.pop("cover","404")
+        except KeyError:
+            pass
+        try:
             i.pop("verified","404")
         except KeyError:
             pass

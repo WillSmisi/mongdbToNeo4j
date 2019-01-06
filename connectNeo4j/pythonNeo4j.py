@@ -31,7 +31,7 @@ def creatSaying(sayingDict):
     tempNode = Node("Saying",text=sayingDict["text"])
     userNode=getPersonNode(sayingDict["user"])
     for (key ,value) in sayingDict.items():
-        if key in ['text','created_at','user']:
+        if key in ['text','created_at','user','_id','reposts_count']:
             pass
         else:
             tempNode[key] = value
