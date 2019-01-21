@@ -15,7 +15,7 @@ weiboNodeName = "Dynamic"
 
 #创建用户节点
 def creatPersonNode(userDict):
-    tempNode = Node(personNodeName,userID=userDict["_id"])
+    tempNode = Node(personNodeName,userid=userDict["_id"])
     for (key ,value) in userDict.items():
         if key == '_id':
             pass
@@ -27,7 +27,7 @@ def creatPersonNode(userDict):
 #根据ID获取用户节点
 def getPersonNode(id):
     matcher = NodeMatcher(graph)
-    retNode = matcher.match(personNodeName,userID=id).first()
+    retNode = matcher.match(personNodeName,userid=id).first()
     return retNode
 
 #包括创建一个微博和关系,前提该微博的用户ID已存在图中
