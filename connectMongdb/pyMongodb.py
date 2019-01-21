@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from connectNeo4j.pythonNeo4j import CreatFriendShip,creatPersonNode,creatSaying
+import re
 import json
 
 conn = MongoClient('127.0.0.1', 27017)
@@ -18,6 +19,18 @@ users_set = db.users
 def InputCreateNode():
     userNodeCount = 1;
     for i in users_set.find():
+        #修改字段为我们的内部字段
+        i["password"] = "123456"
+        if i["gender"] == "m":
+            i["sex"] = "男"
+        else:
+            i["sex"] = "女"
+        try:
+            i.pop("gender", "404")
+        except KeyError:
+            pass
+        i["desc"] = i.pop("description")
+        i["username"] = i.pop("name")
         #删除相关元素
         try:
             i.pop("fans_count","404")
@@ -96,13 +109,31 @@ def InputFriendShip(ID_POOL_SET):
             pass
     return friendShipCount
 
+
 #遍历所有的微博文档，如果他的用户在ID池中创建微博节点，并且创建关系
 def InputWeibo(ID_POOL_SET):
     weiboCount = 1;
     weibo_set = db.weibos
 
     for weibo in weibo_set.find():
+        #修改成后端字段
+        pics = []
+        try:
+            for pic in weibo["pictures"]:
+                pics.append(pic["url"])
+        except TypeError:
+            pics = []
+        weibo["contents_img"] = pics
+        try:
+            weibo["contents"]=re.sub('<[^<]+?>', '', weibo["text"]).replace('\n', '').strip()
+            weibo.pop("text", "404")
+        except KeyError:
+            pass
         # 删除相关元素
+        try:
+            weibo.pop("picture", "404")
+        except KeyError:
+            pass
         try:
             weibo.pop("attitudes_count", "404")
         except KeyError:
@@ -153,7 +184,6 @@ def InputWeibo(ID_POOL_SET):
 
 if __name__ == "__main__":
     #先创建用户节点
-
     user=InputCreateNode()
     ID_POOL_SET = set(ID_POOL_LIST)
     print("ID_list长度",len(ID_POOL_LIST))
@@ -164,7 +194,7 @@ if __name__ == "__main__":
     weibo=InputWeibo(ID_POOL_SET)
     print ('共创建人数：',user,"关系数",friends,"微博数",weibo)
 
-    '''
+'''
     test = []
     test.append("1")
     test.append("2")
@@ -174,4 +204,4 @@ if __name__ == "__main__":
         print("对的")
     if "1232231" in testSet:
         print("错的")
-    '''
+'''

@@ -2,16 +2,20 @@ import py2neo
 from py2neo import Graph,Node,Relationship,NodeMatcher
 
 graph = Graph(
-    "bolt://localhost:7687",
+    "bolt://112.74.36.158:7687",
     username="neo4j",
-    password="root"
+    password="123456"
 )
 print(py2neo.__version__)
-
+#节点和关系命名配置
+personNodeName = "Person"
+weiboRelationshipName = "Release"
+friendshipName = "Friend"
+weiboNodeName = "Dynamic"
 
 #创建用户节点
 def creatPersonNode(userDict):
-    tempNode = Node("appPerson",userID=userDict["_id"])
+    tempNode = Node(personNodeName,userID=userDict["_id"])
     for (key ,value) in userDict.items():
         if key == '_id':
             pass
@@ -23,12 +27,12 @@ def creatPersonNode(userDict):
 #根据ID获取用户节点
 def getPersonNode(id):
     matcher = NodeMatcher(graph)
-    retNode = matcher.match("appPerson",userID=id).first()
+    retNode = matcher.match(personNodeName,userID=id).first()
     return retNode
 
 #包括创建一个微博和关系,前提该微博的用户ID已存在图中
 def creatSaying(sayingDict):
-    tempNode = Node("Saying",text=sayingDict["text"])
+    tempNode = Node(weiboNodeName,contents=sayingDict["contents"])
     userNode=getPersonNode(sayingDict["user"])
     for (key ,value) in sayingDict.items():
         if key in ['text','created_at','user','_id','reposts_count']:
@@ -36,7 +40,7 @@ def creatSaying(sayingDict):
         else:
             tempNode[key] = value
     graph.create(tempNode)
-    submit = Relationship(userNode, "SUBMIT", tempNode,created_at=sayingDict['created_at'])
+    submit = Relationship(userNode, weiboRelationshipName,tempNode,create_Date=sayingDict['created_at'])
     return graph.create(submit)
 
 
@@ -44,15 +48,10 @@ def creatSaying(sayingDict):
 def CreatFriendShip(AuserId,BuserID,time):
     aUserNode = getPersonNode(AuserId)
     bUserNode = getPersonNode(BuserID)
-    friendshipA = Relationship(aUserNode, "Friendship", bUserNode, created_at=time)
-    friendshipB = Relationship(bUserNode, "Friendship", aUserNode, created_at=time)
+    friendshipA = Relationship(aUserNode, friendshipName, bUserNode, created_at=time)
+    friendshipB = Relationship(bUserNode, friendshipName, aUserNode, created_at=time)
     graph.create(friendshipA)
     graph.create(friendshipB)
-
-
-
-
-
 
 ############测试建立好友关系#####
 '''# 结果：成功
